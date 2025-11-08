@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsyConnect - Conecta con tu especialista</title>
+    <!-- Incluimos Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluimos la fuente Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos personalizados */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* gris claro */
+        }
+
+        /* Ocultar páginas por defecto */
+        .page-content {
+            display: none;
+        }
+
+        /* Mostrar la página activa */
+        .page-content.active {
+            display: block;
+        }
+
+        /* Estilos del Chatbot */
+        .chat-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .chat-bubble.user {
+            background-color: #3b82f6; /* azul */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        .chat-bubble.bot {
+            background-color: #e5e7eb; /* gris */
+            color: #1f2937;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Ocultar el scrollbar del chat */
+        #chatBody::-webkit-scrollbar {
+            width: 0.5em;
+        }
+        #chatBody::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chatBody::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Contenedor principal -->
+    <div class="flex flex-col min-h-screen">
+
+        <!-- Header y Navegación -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo / Título -->
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-blue-600">PsyConnect</span>
+                    </div>
+                    
+                    <!-- Navegación -->
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="nav-link border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium" data-page="page-home">
+                            Inicio
+                        </a>
+                        <a href="#" class="nav-link border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium" data-page="page-about">
+                            Sobre Nosotros
+                        </a>
+                        <a href="#" class="nav-link border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-sm font-medium" data-page="page-questionnaire">
+                            Comenzar Cuestionario
+                        </a>
+                    </div>
+                    <!-- Botón de hamburguesa para móvil -->
+                    <div class="sm:hidden">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Menú móvil (oculto por defecto) -->
+                <div id="mobile-menu" class="hidden sm:hidden">
+                    <div class="pt-2 pb-3 space-y-1">
+                        <a href="#" class="nav-link block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" data-page="page-home">Inicio</a>
+                        <a href="#" class="nav-link block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" data-page="page-about">Sobre Nosotros</a>
+                        <a href="#" class="nav-link block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" data-page="page-questionnaire">Comenzar Cuestionario</a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Contenido principal (Páginas) -->
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+            <!-- PÁGINA 1: INICIO (Activa por defecto) -->
+            <section id="page-home" class="page-content active">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
+                        Encuentra al especialista adecuado para ti.
+                    </h1>
+                    <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                        Responde unas breves preguntas y te conectaremos con psicólogos y terapeutas que se adaptan a tus necesidades y preferencias.
+                    </p>
+                    <div class="mt-8">
+                        <button class="nav-link inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700" data-page="page-questionnaire">
+                            Comenzar Cuestionario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-16 bg-white p-8 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-bold text-center text-gray-900">¿Cómo funciona?</h2>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Paso 1 -->
+                        <div class="text-center">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl mx-auto">
+                                1
+                            </div>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">Responde</h3>
+                            <p class="mt-2 text-gray-500">
+                                Completa nuestro cuestionario confidencial. Nos ayuda a entender qué buscas.
+                            </p>
+                        </div>
+                        <!-- Paso 2 -->
+                        <div class="text-center">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl mx-auto">
+                                2
+                            </div>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">Conecta</h3>
+                            <p class="mt-2 text-gray-500">
+                                Analizamos tus respuestas para encontrar los especialistas más compatibles.
+                            </p>
+                        </div>
+                        <!-- Paso 3 -->
+                        <div class="text-center">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl mx-auto">
+                                3
+                            </div>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">Inicia</h3>
+                            <p class="mt-2 text-gray-500">
+                                Revisa los perfiles recomendados y elige con quién quieres contactar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 2: SOBRE NOSOTROS -->
+            <section id="page-about" class="page-content">
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-6">Sobre Nosotros</h1>
+                    <div class="space-y-4 text-gray-700">
+                        <p>
+                            En <span class="font-bold text-blue-600">PsyConnect</span>, entendemos que encontrar al psicólogo adecuado puede ser un proceso abrumador. Nuestra misión es simplificar ese primer paso.
+                        </p>
+                        <p class="font-semibold text-gray-800">
+                            No somos un servicio de terapia, sino un puente inteligente.
+                        </p>
+                        <p>
+                            Actuamos como un conector neutral entre personas que buscan apoyo para su salud mental y profesionales calificados. Creemos que la compatibilidad entre el paciente y el terapeuta es clave para el éxito del proceso.
+                        </p>
+                        <p>
+                            Nuestro cuestionario está diseñado para captar información clave sobre tus necesidades, preferencias y los desafíos que enfrentas. Usamos esta información para filtrar y presentarte una lista de especialistas que mejor se alinean con tu perfil.
+                        </p>
+                        <p>
+                            La decisión final siempre es tuya. Nosotros solo facilitamos la conexión.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 3: CUESTIONARIO -->
+            <section id="page-questionnaire" class="page-content">
+                <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                    <h1 class="text-2xl font-bold text-center text-gray-900 mb-2">Cuestionario Confidencial</h1>
+                    <p class="text-center text-gray-500 mb-6">Paso <span id="question-step">1</span> de 4</p>
+
+                    <!-- Barra de progreso -->
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
+                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+                    </div>
+
+                    <!-- Contenedor de Preguntas -->
+                    <div id="question-container">
+                        
+                        <!-- Pregunta 1 -->
+                        <div class="question-step active" data-step="1">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Cuáles son las principales razones por las que buscas apoyo?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q1-ansiedad" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-ansiedad" class="ml-3 block text-sm font-medium text-gray-700">Ansiedad o estrés</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q1-depresion" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-depresion" class="ml-3 block text-sm font-medium text-gray-700">Depresión o tristeza</labe>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q1-relaciones" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-relaciones" class="ml-3 block text-sm font-medium text-gray-700">Problemas de pareja o relaciones</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q1-trabajo" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-trabajo" class="ml-3 block text-sm font-medium text-gray-700">Estrés laboral o profesional</label>
+                                </div>
+                                 <div class="flex items-center">
+                                    <input id="q1-otro" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-otro" class="ml-3 block text-sm font-medium text-gray-700">Otro / No estoy seguro</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 2 (Oculta) -->
+                        <div class="question-step" data-step="2" style="display: none;">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Has asistido a terapia anteriormente?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q2-si" name="history" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q2-si" class="ml-3 block text-sm font-medium text-gray-700">Sí</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q2-no" name="history" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q2-no" class="ml-3 block text-sm font-medium text-gray-700">No, esta sería mi primera vez</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 3 (Oculta) -->
+                        <div class="question-step" data-step="3" style="display: none;">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Qué estilo de terapia crees que prefieres?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q3-escucha" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-escucha" class="ml-3 block text-sm font-medium text-gray-700">Alguien que principalmente escuche</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q3-tareas" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-tareas" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me dé tareas y herramientas prácticas (Ej. TCC)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q3-explorar" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-explorar" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me ayude a explorar mi pasado (Ej. Psicoanálisis)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q3-nose" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-nose" class="ml-3 block text-sm font-medium text-gray-700">No estoy seguro, necesito orientación</label>
+                                </div>
+                            </div>
+                        </div>
+
+                         <!-- Pregunta 4 (Oculta) -->
+                        <div class="question-step" data-step="4" style="display: none;">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Tienes alguna preferencia de género para tu especialista?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q4-fem" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-fem" class="ml-3 block text-sm font-medium text-gray-700">Prefiero una mujer</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q4-masc" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-masc" class="ml-3 block text-sm font-medium text-gray-700">Prefiero un hombre</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q4-nopref" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-nopref" class="ml-3 block text-sm font-medium text-gray-700">No tengo preferencia</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navegación del Cuestionario -->
+                    <div class="mt-8 flex justify-between">
+                        <button id="prev-question" class="px-6 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>
+                            Anterior
+                        </button>
+                        <button id="next-question" class="px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 4: RESULTADOS (Mockup) -->
+            <section id="page-results" class="page-content">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4">Resultados de tu Búsqueda</h1>
+                    <p class="text-lg text-gray-600 mb-8">
+                        Basado en tus respuestas, hemos encontrado algunos especialistas que podrían ser una buena opción para ti.
+                    </p>
+                </div>
+
+                <!-- Tarjetas de Especialistas (Simuladas) -->
+                <div class="space-y-6 max-w-3xl mx-auto">
+                    <!-- Especialista 1 -->
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row">
+                        <img class="h-48 w-full md:w-48 object-cover" src="https://placehold.co/300x300/EBF8FF/3B82F6?text=Especialista" alt="Foto de especialista">
+                        <div class="p-6 flex-1">
+                            <h2 class="text-xl font-bold text-gray-900">Dra. Ana Gutiérrez</h2>
+                            <p class="text-blue-600 font-medium">Terapia Cognitivo-Conductual (TCC)</p>
+                            <p class="mt-2 text-gray-600 text-sm">Especialista en ansiedad, estrés laboral y transiciones de vida. Tiene 8 años de experiencia.</p>
+                            
+                            <div class="mt-4 bg-blue-50 p-3 rounded-md">
+                                <h4 class="font-semibold text-sm text-blue-800">Por qué es un buen match:</h4>
+                                <p class="text-sm text-blue-700">Tus respuestas indican una preferencia por herramientas prácticas (TCC) para manejar la ansiedad, lo cual es la principal fortaleza de la Dra. Gutiérrez.</p>
+                            </div>
+
+                            <button class="mt-6 w-full md:w-auto px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                Ver Perfil Completo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Especialista 2 -->
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row">
+                        <img class="h-48 w-full md:w-48 object-cover" src="https://placehold.co/300x300/EBF8FF/3B82F6?text=Especialista" alt="Foto de especialista">
+                        <div class="p-6 flex-1">
+                            <h2 class="text-xl font-bold text-gray-900">Lic. Marco Rojas</h2>
+                            <p class="text-blue-600 font-medium">Terapia Humanista y de Pareja</p>
+                            <p class="mt-2 text-gray-600 text-sm">Enfocado en problemas de relaciones, comunicación y desarrollo personal. 12 años de experiencia.</p>
+                            
+                            <div class="mt-4 bg-blue-50 p-3 rounded-md">
+                                <h4 class="font-semibold text-sm text-blue-800">Por qué es un buen match:</h4>
+                                <p class="text-sm text-blue-700">Mencionaste interés en explorar tus relaciones y prefieres un enfoque centrado en la escucha, lo cual se alinea con la Terapia Humanista del Lic. Rojas.</p>
+                            </div>
+
+                            <button class="mt-6 w-full md:w-auto px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                Ver Perfil Completo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 mt-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <p class="text-center text-gray-400 text-sm">
+                    &copy; 2025 PsyConnect. Todos los derechos reservados.
+                    <br>
+                    <span class="font-semibold">Importante:</span> PsyConnect no ofrece consejos médicos, diagnósticos ni tratamiento.
+                </p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ===== CHATBOT ===== -->
+    
+    <!-- Botón flotante del Chat -->
+    <button id="chat-fab" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 transform hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+    </button>
+
+    <!-- Ventana del Chat (Oculta por defecto) -->
+    <div id="chat-window" class="fixed bottom-24 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-lg shadow-xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 ease-out transform translate-y-10 opacity-0 hidden">
+        
+        <!-- Header del Chat -->
+        <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+            <h3 class="font-semibold">Asistente Virtual</h3>
+            <button id="close-chat" class="text-blue-100 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Cuerpo del Chat -->
+        <div id="chatBody" class="flex-1 p-4 overflow-y-auto flex flex-col space-y-2">
+            <!-- Mensaje inicial del Bot -->
+            <div class="chat-bubble bot">
+                ¡Hola! Soy el asistente de PsyConnect. Estoy aquí para resolver dudas sobre nuestro servicio.
+                <br><br>
+                <span class="font-medium text-xs">Recuerda: No puedo dar consejos de salud mental.</span>
+            </div>
+        </div>
+
+        <!-- Input del Chat -->
+        <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex space-x-2">
+                <input type="text" id="chatInput" class="flex-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Escribe tu pregunta...">
+                <button id="sendChat" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===== SCRIPT PRINCIPAL ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LÓGICA DE NAVEGACIÓN DE PÁGINAS ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-content');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+            function showPage(pageId) {
+                // Ocultar todas las páginas
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                });
+
+                // Mostrar la página solicitada
+                const activePage = document.getElementById(pageId);
+                if (activePage) {
+                    activePage.classList.add('active');
+                }
+
+                // Resaltar link de nav (opcional, para escritorio)
+                navLinks.forEach(link => {
+                    link.classList.remove('border-blue-500', 'text-gray-900');
+                    link.classList.add('border-transparent', 'text-gray-500');
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('border-blue-500', 'text-gray-900');
+                        link.classList.remove('border-transparent', 'text-gray-500');
+                    }
+                });
+
+                // Ocultar menú móvil después de la selección
+                mobileMenu.classList.add('hidden');
+
+                // Volver al inicio de la página
+                window.scrollTo(0, 0);
+            }
+
+            // Event listeners para los links de navegación
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.dataset.page;
+                    showPage(pageId);
+                });
+            });
+
+            // Event listener para el menú móvil
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+
+            // --- LÓGICA DEL CUESTIONARIO ---
+            const questionSteps = document.querySelectorAll('.question-step');
+            const nextButton = document.getElementById('next-question');
+            const prevButton = document.getElementById('prev-question');
+            const stepCounter = document.getElementById('question-step');
+            const progressBar = document.getElementById('progress-bar');
+            const totalSteps = questionSteps.length;
+            let currentStep = 1;
+
+            function showQuestion(step) {
+                questionSteps.forEach(q => q.style.display = 'none');
+                const activeQuestion = document.querySelector(`.question-step[data-step="${step}"]`);
+                if (activeQuestion) {
+                    activeQuestion.style.display = 'block';
+                }
+
+                // Actualizar contador y barra
+                stepCounter.textContent = step;
+                progressBar.style.width = `${(step / totalSteps) * 100}%`;
+
+                // Habilitar/deshabilitar botones
+                prevButton.disabled = (step === 1);
+                
+                // Cambiar texto del botón en el último paso
+                if (step === totalSteps) {
+                    nextButton.textContent = 'Ver Resultados';
+                } else {
+                    nextButton.textContent = 'Siguiente';
+                }
+            }
+
+            nextButton.addEventListener('click', () => {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showQuestion(currentStep);
+                } else {
+                    // Lógica para finalizar el cuestionario
+                    // Aquí se recolectarían los datos
+                    // Por ahora, solo mostramos la página de resultados
+                    showPage('page-results');
+                    // Opcional: resetear el cuestionario
+                    currentStep = 1;
+                    showQuestion(currentStep);
+                }
+            });
+
+            prevButton.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    showQuestion(currentStep);
+                }
+            });
+
+            // --- LÓGICA DEL CHATBOT ---
+            const chatFab = document.getElementById('chat-fab');
+            const chatWindow = document.getElementById('chat-window');
+            const closeChat = document.getElementById('close-chat');
+            const sendChat = document.getElementById('sendChat');
+            const chatInput = document.getElementById('chatInput');
+            const chatBody = document.getElementById('chatBody');
+
+            function toggleChat() {
+                chatWindow.classList.toggle('hidden');
+                // Pequeña animación de entrada/salida
+                if (!chatWindow.classList.contains('hidden')) {
+                    chatWindow.classList.remove('translate-y-10', 'opacity-0');
+                    chatWindow.classList.add('translate-y-0', 'opacity-100');
+                } else {
+                    chatWindow.classList.add('translate-y-10', 'opacity-0');
+                    chatWindow.classList.remove('translate-y-0', 'opacity-100');
+                }
+            }
+
+            chatFab.addEventListener('click', toggleChat);
+            closeChat.addEventListener('click', toggleChat);
+
+            sendChat.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            });
+
+            function handleSendMessage() {
+                const messageText = chatInput.value.trim();
+                if (messageText === '') return;
+
+                // 1. Mostrar mensaje del usuario
+                appendMessage(messageText, 'user');
+                chatInput.value = '';
+
+                // 2. Simular respuesta del bot
+                setTimeout(() => {
+                    const botResponse = getBotResponse(messageText);
+                    appendMessage(botResponse, 'bot');
+                }, 1000);
+            }
+
+            function appendMessage(text, sender) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', sender);
+                bubble.textContent = text;
+                chatBody.appendChild(bubble);
+                
+                // Auto-scroll al fondo
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            // "IA" simple del Chatbot
+            function getBotResponse(input) {
+                const lowerInput = input.toLowerCase();
+
+                if (lowerInput.includes('hola') || lowerInput.includes('buenos días')) {
+                    return '¡Hola! ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre cómo funciona el servicio o qué hacemos.';
+                }
+                
+                if (lowerInput.includes('qué es esto') || lowerInput.includes('servicio') || lowerInput.includes('qué hacen')) {
+                    return 'Somos una plataforma que te conecta con psicólogos. Respondes un cuestionario y te mostramos perfiles de especialistas compatibles. No somos un servicio de terapia, solo el medio de conexión.';
+                }
+
+                if (lowerInput.includes('precio') || lowerInput.includes('costo') || lowerInput.includes('gratis')) {
+                    return 'Nuestro servicio de conexión (el cuestionario y las recomendaciones) es gratuito para ti. Los honorarios de cada especialista varían y los acuerdas directamente con ellos.';
+                }
+
+                if (lowerInput.includes('ayuda') || lowerInput.includes('terapia') || lowerInput.includes('mal')) {
+                    return 'Entiendo. Si buscas iniciar un proceso terapéutico, te invito a llenar el cuestionario. Si estás en una crisis, por favor contacta a los servicios de emergencia de tu localidad. Yo solo soy un asistente virtual para dudas del sitio.';
+                }
+
+                if (lowerInput.includes('gracias')) {
+                    return '¡De nada! Estoy aquí si tienes más preguntas sobre cómo funciona PsyConnect.';
+                }
+
+                return 'No entendí muy bien tu pregunta. ¿Podrías reformularla? Recuerda que solo puedo responder dudas sobre qué es PsyConnect y cómo funciona nuestro servicio.';
+            }
+
+            // Mostrar página de inicio por defecto al cargar
+            showPage('page-home');
+        });
+    </script>
+
+</body>
+</html>
+
