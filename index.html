@@ -34,6 +34,8 @@
             padding: 10px 15px;
             border-radius: 15px;
             margin-bottom: 10px;
+            /* Transición para suavidad */
+            transition: all 0.3s ease;
         }
         .chat-bubble.user {
             background-color: #3b82f6; /* azul */
@@ -59,6 +61,42 @@
             background: #d1d5db;
             border-radius: 10px;
         }
+
+        /* Animación de "escribiendo" del bot */
+        .dot-flashing {
+            display: inline-block;
+            height: 4px;
+            width: 4px;
+            border-radius: 50%;
+            background-color: #9ca3af; /* gris-400 */
+            animation: dotFlashing 1s infinite linear alternate;
+            animation-delay: 0.5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            height: 4px;
+            width: 4px;
+            border-radius: 50%;
+            background-color: #9ca3af;
+        }
+        .dot-flashing::before {
+            left: -8px;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 8px;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dotFlashing {
+            0% { background-color: #9ca3af; }
+            50%, 100% { background-color: #d1d5db; }
+        }
+
     </style>
 </head>
 <body class="antialiased">
@@ -67,7 +105,7 @@
     <div class="flex flex-col min-h-screen">
 
         <!-- Header y Navegación -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
             <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <!-- Logo / Título -->
@@ -136,7 +174,7 @@
                             </div>
                             <h3 class="mt-4 text-lg font-medium text-gray-900">Responde</h3>
                             <p class="mt-2 text-gray-500">
-                                Completa nuestro cuestionario confidencial. Nos ayuda a entender qué buscas.
+                                Completa nuestro cuestionario confidencial y detallado.
                             </p>
                         </div>
                         <!-- Paso 2 -->
@@ -144,9 +182,9 @@
                             <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl mx-auto">
                                 2
                             </div>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">Conecta</h3>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">Analiza ✨</h3>
                             <p class="mt-2 text-gray-500">
-                                Analizamos tus respuestas para encontrar los especialistas más compatibles.
+                                Nuestra IA analiza tus respuestas para encontrar perfiles compatibles.
                             </p>
                         </div>
                         <!-- Paso 3 -->
@@ -154,9 +192,9 @@
                             <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold text-xl mx-auto">
                                 3
                             </div>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">Inicia</h3>
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">Conecta</h3>
                             <p class="mt-2 text-gray-500">
-                                Revisa los perfiles recomendados y elige con quién quieres contactar.
+                                Revisa el desglose de por qué te recomendamos cada perfil.
                             </p>
                         </div>
                     </div>
@@ -178,7 +216,7 @@
                             Actuamos como un conector neutral entre personas que buscan apoyo para su salud mental y profesionales calificados. Creemos que la compatibilidad entre el paciente y el terapeuta es clave para el éxito del proceso.
                         </p>
                         <p>
-                            Nuestro cuestionario está diseñado para captar información clave sobre tus necesidades, preferencias y los desafíos que enfrentas. Usamos esta información para filtrar y presentarte una lista de especialistas que mejor se alinean con tu perfil.
+                            Nuestro cuestionario está diseñado para captar información clave sobre tus necesidades, preferencias y los desafíos que enfrentas. <span class="font-semibold">Usamos IA para procesar esta información</span> y presentarte una lista de especialistas (ficticios, como demostración) que mejor se alinean con tu perfil.
                         </p>
                         <p>
                             La decisión final siempre es tuya. Nosotros solo facilitamos la conexión.
@@ -191,96 +229,134 @@
             <section id="page-questionnaire" class="page-content">
                 <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
                     <h1 class="text-2xl font-bold text-center text-gray-900 mb-2">Cuestionario Confidencial</h1>
-                    <p class="text-center text-gray-500 mb-6">Paso <span id="question-step">1</span> de 4</p>
+                    <p class="text-center text-gray-500 mb-6">Paso <span id="question-step">1</span> de 6</p>
 
                     <!-- Barra de progreso -->
                     <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
-                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 16.66%"></div>
                     </div>
 
                     <!-- Contenedor de Preguntas -->
                     <div id="question-container">
                         
-                        <!-- Pregunta 1 -->
+                        <!-- Pregunta 1: Razón -->
                         <div class="question-step active" data-step="1">
                             <label class="text-lg font-medium text-gray-900 mb-4 block">¿Cuáles son las principales razones por las que buscas apoyo?</label>
                             <div class="space-y-3">
                                 <div class="flex items-center">
-                                    <input id="q1-ansiedad" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <input id="q1-ansiedad" name="reason" type="radio" value="Ansiedad o estrés" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
                                     <label for="q1-ansiedad" class="ml-3 block text-sm font-medium text-gray-700">Ansiedad o estrés</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q1-depresion" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q1-depresion" class="ml-3 block text-sm font-medium text-gray-700">Depresión o tristeza</labe>
+                                    <input id="q1-depresion" name="reason" type="radio" value="Depresión o tristeza" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q1-depresion" class="ml-3 block text-sm font-medium text-gray-700">Depresión o tristeza</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q1-relaciones" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <input id="q1-relaciones" name="reason" type="radio" value="Problemas de pareja o relaciones" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
                                     <label for="q1-relaciones" class="ml-3 block text-sm font-medium text-gray-700">Problemas de pareja o relaciones</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q1-trabajo" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <input id="q1-trabajo" name="reason" type="radio" value="Estrés laboral o profesional" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
                                     <label for="q1-trabajo" class="ml-3 block text-sm font-medium text-gray-700">Estrés laboral o profesional</label>
                                 </div>
                                  <div class="flex items-center">
-                                    <input id="q1-otro" name="reason" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <input id="q1-otro" name="reason" type="radio" value="Otro / No estoy seguro" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
                                     <label for="q1-otro" class="ml-3 block text-sm font-medium text-gray-700">Otro / No estoy seguro</label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Pregunta 2 (Oculta) -->
+                        <!-- Pregunta 2: Severidad (NUEVA) -->
                         <div class="question-step" data-step="2" style="display: none;">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Qué tanto están afectando estos sentimientos tu vida diaria?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q2-leve" name="severity" type="radio" value="Es algo leve, más preventivo o de autoconocimiento" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q2-leve" class="ml-3 block text-sm font-medium text-gray-700">Es algo leve, más preventivo</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q2-moderado" name="severity" type="radio" value="Me afecta de forma moderada, es molesto" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q2-moderado" class="ml-3 block text-sm font-medium text-gray-700">Me afecta de forma moderada</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q2-severo" name="severity" type="radio" value="Me afecta de forma severa, me cuesta trabajo funcionar" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q2-severo" class="ml-3 block text-sm font-medium text-gray-700">Me afecta de forma severa, me cuesta trabajo funcionar</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pregunta 3: Historial (Antes 2) -->
+                        <div class="question-step" data-step="3" style="display: none;">
                             <label class="text-lg font-medium text-gray-900 mb-4 block">¿Has asistido a terapia anteriormente?</label>
                             <div class="space-y-3">
                                 <div class="flex items-center">
-                                    <input id="q2-si" name="history" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q2-si" class="ml-3 block text-sm font-medium text-gray-700">Sí</label>
+                                    <input id="q3-si" name="history" type="radio" value="Sí" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-si" class="ml-3 block text-sm font-medium text-gray-700">Sí</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q2-no" name="history" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q2-no" class="ml-3 block text-sm font-medium text-gray-700">No, esta sería mi primera vez</label>
+                                    <input id="q3-no" name="history" type="radio" value="No, esta sería mi primera vez" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q3-no" class="ml-3 block text-sm font-medium text-gray-700">No, esta sería mi primera vez</label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Pregunta 3 (Oculta) -->
-                        <div class="question-step" data-step="3" style="display: none;">
+                        <!-- Pregunta 4: Estilo (Antes 3) -->
+                        <div class="question-step" data-step="4" style="display: none;">
                             <label class="text-lg font-medium text-gray-900 mb-4 block">¿Qué estilo de terapia crees que prefieres?</label>
                             <div class="space-y-3">
                                 <div class="flex items-center">
-                                    <input id="q3-escucha" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q3-escucha" class="ml-3 block text-sm font-medium text-gray-700">Alguien que principalmente escuche</label>
+                                    <input id="q4-escucha" name="style" type="radio" value="Alguien que principalmente escuche" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-escucha" class="ml-3 block text-sm font-medium text-gray-700">Alguien que principalmente escuche</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q3-tareas" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q3-tareas" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me dé tareas y herramientas prácticas (Ej. TCC)</label>
+                                    <input id="q4-tareas" name="style" type="radio" value="Alguien que me dé tareas y herramientas prácticas (Ej. TCC)" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-tareas" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me dé tareas y herramientas prácticas (Ej. TCC)</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q3-explorar" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q3-explorar" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me ayude a explorar mi pasado (Ej. Psicoanálisis)</label>
+                                    <input id="q4-explorar" name="style" type="radio" value="Alguien que me ayude a explorar mi pasado (Ej. Psicoanálisis)" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-explorar" class="ml-3 block text-sm font-medium text-gray-700">Alguien que me ayude a explorar mi pasado (Ej. Psicoanálisis)</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q3-nose" name="style" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q3-nose" class="ml-3 block text-sm font-medium text-gray-700">No estoy seguro, necesito orientación</label>
+                                    <input id="q4-nose" name="style" type="radio" value="No estoy seguro, necesito orientación" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q4-nose" class="ml-3 block text-sm font-medium text-gray-700">No estoy seguro, necesito orientación</label>
                                 </div>
                             </div>
                         </div>
 
-                         <!-- Pregunta 4 (Oculta) -->
-                        <div class="question-step" data-step="4" style="display: none;">
+                        <!-- Pregunta 5: Formato (NUEVA) -->
+                        <div class="question-step" data-step="5" style="display: none;">
+                            <label class="text-lg font-medium text-gray-900 mb-4 block">¿Qué formato de terapia prefieres?</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input id="q5-online" name="format" type="radio" value="Terapia en línea (videollamada)" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q5-online" class="ml-3 block text-sm font-medium text-gray-700">Terapia en línea (videollamada)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q5-presencial" name="format" type="radio" value="Terapia presencial (en consultorio)" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q5-presencial" class="ml-3 block text-sm font-medium text-gray-700">Terapia presencial (en consultorio)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="q5-indiferente" name="format" type="radio" value="Me es indiferente" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q5-indiferente" class="ml-3 block text-sm font-medium text-gray-700">Me es indiferente</label>
+                                </div>
+                            </div>
+                        </div>
+
+                         <!-- Pregunta 6: Género (Antes 4) -->
+                        <div class="question-step" data-step="6" style="display: none;">
                             <label class="text-lg font-medium text-gray-900 mb-4 block">¿Tienes alguna preferencia de género para tu especialista?</label>
                             <div class="space-y-3">
                                 <div class="flex items-center">
-                                    <input id="q4-fem" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q4-fem" class="ml-3 block text-sm font-medium text-gray-700">Prefiero una mujer</label>
+                                    <input id="q6-fem" name="gender" type="radio" value="Prefiero una mujer" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q6-fem" class="ml-3 block text-sm font-medium text-gray-700">Prefiero una mujer</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q4-masc" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q4-masc" class="ml-3 block text-sm font-medium text-gray-700">Prefiero un hombre</label>
+                                    <input id="q6-masc" name="gender" type="radio" value="Prefiero un hombre" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q6-masc" class="ml-3 block text-sm font-medium text-gray-700">Prefiero un hombre</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input id="q4-nopref" name="gender" type="radio" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                                    <label for="q4-nopref" class="ml-3 block text-sm font-medium text-gray-700">No tengo preferencia</label>
+                                    <input id="q6-nopref" name="gender" type="radio" value="No tengo preferencia" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                                    <label for="q6-nopref" class="ml-3 block text-sm font-medium text-gray-700">No tengo preferencia</label>
                                 </div>
                             </div>
                         </div>
@@ -298,7 +374,7 @@
                 </div>
             </section>
 
-            <!-- PÁGINA 4: RESULTADOS (Mockup) -->
+            <!-- PÁGINA 4: RESULTADOS (Generados por IA) -->
             <section id="page-results" class="page-content">
                 <div class="max-w-3xl mx-auto text-center">
                     <h1 class="text-3xl font-bold text-gray-900 mb-4">Resultados de tu Búsqueda</h1>
@@ -307,46 +383,26 @@
                     </p>
                 </div>
 
-                <!-- Tarjetas de Especialistas (Simuladas) -->
-                <div class="space-y-6 max-w-3xl mx-auto">
-                    <!-- Especialista 1 -->
-                    <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row">
-                        <img class="h-48 w-full md:w-48 object-cover" src="https://placehold.co/300x300/EBF8FF/3B82F6?text=Especialista" alt="Foto de especialista">
-                        <div class="p-6 flex-1">
-                            <h2 class="text-xl font-bold text-gray-900">Dra. Ana Gutiérrez</h2>
-                            <p class="text-blue-600 font-medium">Terapia Cognitivo-Conductual (TCC)</p>
-                            <p class="mt-2 text-gray-600 text-sm">Especialista en ansiedad, estrés laboral y transiciones de vida. Tiene 8 años de experiencia.</p>
-                            
-                            <div class="mt-4 bg-blue-50 p-3 rounded-md">
-                                <h4 class="font-semibold text-sm text-blue-800">Por qué es un buen match:</h4>
-                                <p class="text-sm text-blue-700">Tus respuestas indican una preferencia por herramientas prácticas (TCC) para manejar la ansiedad, lo cual es la principal fortaleza de la Dra. Gutiérrez.</p>
-                            </div>
-
-                            <button class="mt-6 w-full md:w-auto px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                                Ver Perfil Completo
-                            </button>
-                        </div>
+                <!-- Contenedor de Loading -->
+                <div id="results-loading" class="text-center py-12" style="display: none;">
+                    <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] text-blue-600 motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+                        <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Cargando...</span>
                     </div>
-
-                    <!-- Especialista 2 -->
-                    <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row">
-                        <img class="h-48 w-full md:w-48 object-cover" src="https://placehold.co/300x300/EBF8FF/3B82F6?text=Especialista" alt="Foto de especialista">
-                        <div class="p-6 flex-1">
-                            <h2 class="text-xl font-bold text-gray-900">Lic. Marco Rojas</h2>
-                            <p class="text-blue-600 font-medium">Terapia Humanista y de Pareja</p>
-                            <p class="mt-2 text-gray-600 text-sm">Enfocado en problemas de relaciones, comunicación y desarrollo personal. 12 años de experiencia.</p>
-                            
-                            <div class="mt-4 bg-blue-50 p-3 rounded-md">
-                                <h4 class="font-semibold text-sm text-blue-800">Por qué es un buen match:</h4>
-                                <p class="text-sm text-blue-700">Mencionaste interés en explorar tus relaciones y prefieres un enfoque centrado en la escucha, lo cual se alinea con la Terapia Humanista del Lic. Rojas.</p>
-                            </div>
-
-                            <button class="mt-6 w-full md:w-auto px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                                Ver Perfil Completo
-                            </button>
-                        </div>
-                    </div>
+                    <p class="mt-4 text-gray-600">✨ Estamos analizando tus respuestas para encontrar los mejores especialistas...</p>
                 </div>
+
+                <!-- Contenedor Dinámico de Tarjetas -->
+                <div id="results-container" class="space-y-6 max-w-3xl mx-auto">
+                    <!-- Las tarjetas de especialista se insertarán aquí por JS -->
+                </div>
+
+                <!-- Botón de Rehacer Test (NUEVO) -->
+                <div class="max-w-3xl mx-auto text-center mt-12">
+                    <button id="redo-test" class="px-6 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Rehacer Cuestionario
+                    </button>
+                </div>
+
             </section>
 
         </main>
@@ -374,11 +430,11 @@
     </button>
 
     <!-- Ventana del Chat (Oculta por defecto) -->
-    <div id="chat-window" class="fixed bottom-24 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-lg shadow-xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 ease-out transform translate-y-10 opacity-0 hidden">
+    <div id="chat-window" class="fixed bottom-24 right-6 w-80 sm:w-96 h-[450px] bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col overflow-hidden transition-all duration-300 ease-out transform translate-y-10 opacity-0 hidden">
         
         <!-- Header del Chat -->
         <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
-            <h3 class="font-semibold">Asistente Virtual</h3>
+            <h3 class="font-semibold">✨ Asistente Virtual</h3>
             <button id="close-chat" class="text-blue-100 hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -394,13 +450,20 @@
                 <br><br>
                 <span class="font-medium text-xs">Recuerda: No puedo dar consejos de salud mental.</span>
             </div>
+            
+            <!-- Mensaje "escribiendo" del Bot (oculto) -->
+            <div id="bot-typing" class="chat-bubble bot" style="display: none; padding: 12px 15px;">
+                <div style="position: relative; height: 4px; width: 4px;">
+                    <span class="dot-flashing"></span>
+                </div>
+            </div>
         </div>
 
         <!-- Input del Chat -->
         <div class="p-4 border-t border-gray-200 bg-gray-50">
             <div class="flex space-x-2">
                 <input type="text" id="chatInput" class="flex-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Escribe tu pregunta...">
-                <button id="sendChat" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm">
+                <button id="sendChat" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm disabled:opacity-50" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
@@ -412,6 +475,10 @@
 
     <!-- ===== SCRIPT PRINCIPAL ===== -->
     <script>
+        // Clave de API (dejar vacía para que el entorno la proporcione)
+        const apiKey = "";
+        const genAIApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- LÓGICA DE NAVEGACIÓN DE PÁGINAS ---
@@ -432,7 +499,7 @@
                     activePage.classList.add('active');
                 }
 
-                // Resaltar link de nav (opcional, para escritorio)
+                // Resaltar link de nav
                 navLinks.forEach(link => {
                     link.classList.remove('border-blue-500', 'text-gray-900');
                     link.classList.add('border-transparent', 'text-gray-500');
@@ -442,14 +509,11 @@
                     }
                 });
 
-                // Ocultar menú móvil después de la selección
+                // Ocultar menú móvil
                 mobileMenu.classList.add('hidden');
-
-                // Volver al inicio de la página
                 window.scrollTo(0, 0);
             }
 
-            // Event listeners para los links de navegación
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -458,7 +522,6 @@
                 });
             });
 
-            // Event listener para el menú móvil
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
@@ -470,6 +533,7 @@
             const prevButton = document.getElementById('prev-question');
             const stepCounter = document.getElementById('question-step');
             const progressBar = document.getElementById('progress-bar');
+            const redoTestButton = document.getElementById('redo-test'); // NUEVO
             const totalSteps = questionSteps.length;
             let currentStep = 1;
 
@@ -480,33 +544,25 @@
                     activeQuestion.style.display = 'block';
                 }
 
-                // Actualizar contador y barra
                 stepCounter.textContent = step;
                 progressBar.style.width = `${(step / totalSteps) * 100}%`;
-
-                // Habilitar/deshabilitar botones
                 prevButton.disabled = (step === 1);
                 
-                // Cambiar texto del botón en el último paso
                 if (step === totalSteps) {
-                    nextButton.textContent = 'Ver Resultados';
+                    nextButton.textContent = '✨ Ver Resultados';
                 } else {
                     nextButton.textContent = 'Siguiente';
                 }
             }
 
-            nextButton.addEventListener('click', () => {
+            nextButton.addEventListener('click', async () => {
                 if (currentStep < totalSteps) {
                     currentStep++;
                     showQuestion(currentStep);
                 } else {
-                    // Lógica para finalizar el cuestionario
-                    // Aquí se recolectarían los datos
-                    // Por ahora, solo mostramos la página de resultados
+                    // Último paso: Generar resultados con IA
                     showPage('page-results');
-                    // Opcional: resetear el cuestionario
-                    currentStep = 1;
-                    showQuestion(currentStep);
+                    await generateSpecialists(); // Llamada a la función de Gemini
                 }
             });
 
@@ -517,20 +573,47 @@
                 }
             });
 
-            // --- LÓGICA DEL CHATBOT ---
+            // NUEVA FUNCIÓN: Resetear Cuestionario
+            function resetQuestionnaire() {
+                // Desmarcar todos los radio buttons
+                const inputs = document.querySelectorAll('#question-container input[type="radio"]');
+                inputs.forEach(input => input.checked = false);
+
+                // Resetear al paso 1
+                currentStep = 1;
+                showQuestion(currentStep);
+
+                // Limpiar resultados anteriores
+                document.getElementById('results-container').innerHTML = '';
+            }
+
+            // NUEVO: Event Listener para el botón de rehacer
+            redoTestButton.addEventListener('click', () => {
+                showPage('page-questionnaire');
+                resetQuestionnaire();
+            });
+
+
+            // --- LÓGICA DEL CHATBOT CON GEMINI ---
             const chatFab = document.getElementById('chat-fab');
             const chatWindow = document.getElementById('chat-window');
             const closeChat = document.getElementById('close-chat');
             const sendChat = document.getElementById('sendChat');
             const chatInput = document.getElementById('chatInput');
             const chatBody = document.getElementById('chatBody');
+            const botTyping = document.getElementById('bot-typing');
+
+            // Habilitar/deshabilitar botón de envío
+            chatInput.addEventListener('input', () => {
+                sendChat.disabled = chatInput.value.trim() === '';
+            });
 
             function toggleChat() {
                 chatWindow.classList.toggle('hidden');
-                // Pequeña animación de entrada/salida
                 if (!chatWindow.classList.contains('hidden')) {
                     chatWindow.classList.remove('translate-y-10', 'opacity-0');
                     chatWindow.classList.add('translate-y-0', 'opacity-100');
+                    sendChat.disabled = chatInput.value.trim() === ''; // Re-verificar al abrir
                 } else {
                     chatWindow.classList.add('translate-y-10', 'opacity-0');
                     chatWindow.classList.remove('translate-y-0', 'opacity-100');
@@ -542,68 +625,239 @@
 
             sendChat.addEventListener('click', handleSendMessage);
             chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !sendChat.disabled) {
                     handleSendMessage();
                 }
             });
 
-            function handleSendMessage() {
+            async function handleSendMessage() {
                 const messageText = chatInput.value.trim();
                 if (messageText === '') return;
 
+                chatInput.value = '';
+                sendChat.disabled = true;
+
                 // 1. Mostrar mensaje del usuario
                 appendMessage(messageText, 'user');
-                chatInput.value = '';
+                
+                // 2. Mostrar indicador de "escribiendo"
+                botTyping.style.display = 'block';
+                chatBody.scrollTop = chatBody.scrollHeight;
 
-                // 2. Simular respuesta del bot
-                setTimeout(() => {
-                    const botResponse = getBotResponse(messageText);
+                // 3. Obtener respuesta de Gemini
+                try {
+                    const botResponse = await getGeminiChatResponse(messageText);
                     appendMessage(botResponse, 'bot');
-                }, 1000);
+                } catch (error) {
+                    console.error("Error al contactar la API de Gemini:", error);
+                    appendMessage("Lo siento, estoy teniendo problemas para conectarme. Por favor, intenta de nuevo más tarde.", 'bot');
+                } finally {
+                    // 4. Ocultar "escribiendo"
+                    botTyping.style.display = 'none';
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
             }
 
             function appendMessage(text, sender) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('chat-bubble', sender);
-                bubble.textContent = text;
-                chatBody.appendChild(bubble);
+                // Convertir saltos de línea a <br> para formato
+                bubble.innerHTML = text.replace(/\n/g, '<br>');
+                chatBody.insertBefore(bubble, botTyping); // Insertar antes del indicador
                 
-                // Auto-scroll al fondo
                 chatBody.scrollTop = chatBody.scrollHeight;
             }
 
-            // "IA" simple del Chatbot
-            function getBotResponse(input) {
-                const lowerInput = input.toLowerCase();
+            // --- LÓGICA DE API DE GEMINI ---
 
-                if (lowerInput.includes('hola') || lowerInput.includes('buenos días')) {
-                    return '¡Hola! ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre cómo funciona el servicio o qué hacemos.';
+            /**
+             * Maneja reintentos con backoff exponencial.
+             */
+            async function retryWithExponentialBackoff(fetchFn, maxRetries = 3, delay = 1000) {
+                let lastError;
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        return await fetchFn();
+                    } catch (error) {
+                        lastError = error;
+                        // No registrar en consola si es un error de throttling (429)
+                        if (error.status !== 429) {
+                            console.error(`Intento ${i + 1}/${maxRetries} fallido:`, error.message);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                    }
                 }
-                
-                if (lowerInput.includes('qué es esto') || lowerInput.includes('servicio') || lowerInput.includes('qué hacen')) {
-                    return 'Somos una plataforma que te conecta con psicólogos. Respondes un cuestionario y te mostramos perfiles de especialistas compatibles. No somos un servicio de terapia, solo el medio de conexión.';
-                }
-
-                if (lowerInput.includes('precio') || lowerInput.includes('costo') || lowerInput.includes('gratis')) {
-                    return 'Nuestro servicio de conexión (el cuestionario y las recomendaciones) es gratuito para ti. Los honorarios de cada especialista varían y los acuerdas directamente con ellos.';
-                }
-
-                if (lowerInput.includes('ayuda') || lowerInput.includes('terapia') || lowerInput.includes('mal')) {
-                    return 'Entiendo. Si buscas iniciar un proceso terapéutico, te invito a llenar el cuestionario. Si estás en una crisis, por favor contacta a los servicios de emergencia de tu localidad. Yo solo soy un asistente virtual para dudas del sitio.';
-                }
-
-                if (lowerInput.includes('gracias')) {
-                    return '¡De nada! Estoy aquí si tienes más preguntas sobre cómo funciona PsyConnect.';
-                }
-
-                return 'No entendí muy bien tu pregunta. ¿Podrías reformularla? Recuerda que solo puedo responder dudas sobre qué es PsyConnect y cómo funciona nuestro servicio.';
+                throw lastError;
             }
 
-            // Mostrar página de inicio por defecto al cargar
+            /**
+             * Llama a Gemini para el Chatbot.
+             */
+            async function getGeminiChatResponse(userQuery) {
+                const systemPrompt = `Eres un asistente virtual para un sitio web llamado "PsyConnect".
+Tu única función es responder preguntas sobre el servicio que ofrece PsyConnect.
+Reglas estrictas:
+1.  **Qué es PsyConnect:** Es un servicio gratuito que conecta a usuarios con psicólogos. El usuario llena un cuestionario y la IA le muestra perfiles de especialistas compatibles. Es un "puente" o "conector", no una clínica.
+2.  **Qué NO eres:** NO eres un psicólogo, terapeuta, ni médico. NO puedes dar consejos de salud mental, diagnósticos, opiniones sobre sentimientos, ni apoyo emocional.
+3.  **Cómo manejar solicitudes de ayuda:** Si un usuario te pide ayuda psicológica, te dice que se siente mal, o te pregunta sobre terapia, DEBES RECHAZARLO AMABLEMENTE. Responde algo como: "Entiendo. Sin embargo, no soy un profesional de la salud mental y no puedo darte consejos. Mi única función es explicarte cómo PsyConnect puede ayudarte a *encontrar* un especialista. Si deseas comenzar, puedes llenar el cuestionario. Si estás en una crisis, por favor contacta a los servicios de emergencia de tu localidad."
+4.  **Costo:** El servicio de PsyConnect (el cuestionario y la conexión) es gratuito. Los honorarios de cada psicólogo son aparte y se acuerdan con ellos.
+5.  **Sé breve:** Responde en 2-3 frases cortas. Mantén un tono amable y profesional.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                const fetchFn = async () => {
+                    const response = await fetch(genAIApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    return response.json();
+                };
+
+                const result = await retryWithExponentialBackoff(fetchFn);
+                
+                if (result.candidates && result.candidates[0].content?.parts?.[0]?.text) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Respuesta de API inesperada.");
+                }
+            }
+
+            /**
+             * Recopila datos del cuestionario.
+             */
+            function getQuestionnaireData() {
+                let answers = [];
+                const inputs = document.querySelectorAll('#question-container input[type="radio"]:checked');
+                inputs.forEach(input => {
+                    // Usamos el 'value' que es más limpio que el label
+                    if (input.value) {
+                        answers.push(input.value);
+                    }
+                });
+                
+                if (answers.length === 0) {
+                    return "El usuario no seleccionó opciones, pero está buscando un especialista.";
+                }
+                return "Necesidades del usuario: " + answers.join(', ');
+            }
+
+            /**
+             * Llama a Gemini para generar perfiles de especialistas (con JSON).
+             */
+            async function generateSpecialists() {
+                const loadingEl = document.getElementById('results-loading');
+                const resultsEl = document.getElementById('results-container');
+
+                loadingEl.style.display = 'block';
+                resultsEl.innerHTML = ''; // Limpiar resultados anteriores
+
+                const userPrompt = getQuestionnaireData();
+                
+                // --- PROMPT DE SISTEMA ACTUALIZADO ---
+                const systemPrompt = `Eres un generador de perfiles para PsyConnect. Basado en las necesidades del usuario, crea un array de 2 o 3 perfiles de especialistas *ficticios*. Adhiérete estrictamente al esquema JSON proporcionado.
+El usuario ha proporcionado varias respuestas (razón, severidad, formato, estilo, etc.).
+Tu tarea más importante es que la 'matchReason' (razón del match) sea un desglose detallado que conecte *múltiples* de estas respuestas con el perfil del especialista. Sé específico.
+Ejemplo: 'Como buscas terapia online (formato) para una ansiedad que te afecta severamente (severidad) y prefieres un enfoque práctico (estilo), la Dra. Luna es ideal por su experiencia en TCC para trastornos de ansiedad en modalidad virtual.'`;
+                
+                const jsonSchema = {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "name": { "type": "STRING", "description": "Nombre ficticio (Ej. Dra. Isabel Luna)" },
+                            "specialty": { "type": "STRING", "description": "Especialidad principal (Ej. Terapia Cognitivo-Conductual)" },
+                            "description": { "type": "STRING", "description": "Breve descripción (Ej. 10 años de experiencia en ansiedad...)" },
+                            "matchReason": { "type": "STRING", "description": "Razón personalizada y detallada de por qué es un buen match, conectando múltiples respuestas del usuario." }
+                        },
+                        "required": ["name", "specialty", "description", "matchReason"]
+                    }
+                };
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: jsonSchema
+                    }
+                };
+
+                try {
+                    const fetchFn = async () => {
+                        const response = await fetch(genAIApiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                        return response.json();
+                    };
+
+                    const result = await retryWithExponentialBackoff(fetchFn);
+
+                    if (result.candidates && result.candidates[0].content?.parts?.[0]?.text) {
+                        const specialists = JSON.parse(result.candidates[0].content.parts[0].text);
+                        renderSpecialists(specialists);
+                    } else {
+                        throw new Error("No se recibieron perfiles.");
+                    }
+
+                } catch (error) {
+                    console.error("Error al generar especialistas:", error);
+                    resultsEl.innerHTML = `<p class="text-red-500 text-center">Hubo un error al generar tus recomendaciones. Por favor, intenta de nuevo.</p>`;
+                } finally {
+                    loadingEl.style.display = 'none';
+                }
+            }
+
+            /**
+             * Dibuja las tarjetas de especialistas en el DOM.
+             */
+            function renderSpecialists(specialists) {
+                const resultsEl = document.getElementById('results-container');
+                resultsEl.innerHTML = ''; // Limpiar
+
+                if (!specialists || specialists.length === 0) {
+                    resultsEl.innerHTML = `<p class="text-gray-600 text-center">No pudimos encontrar especialistas con esos criterios. Intenta ajustar tus respuestas.</p>`;
+                    return;
+                }
+
+                specialists.forEach(spec => {
+                    const specialistCardHTML = `
+                        <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row animate-fadeIn">
+                            <img class="h-48 w-full md:w-48 object-cover" src="https://placehold.co/300x300/EBF8FF/3B82F6?text=Especialista" alt="Foto de ${spec.name}">
+                            <div class="p-6 flex-1">
+                                <h2 class="text-xl font-bold text-gray-900">${spec.name}</h2>
+                                <p class="text-blue-600 font-medium">${spec.specialty}</p>
+                                <p class="mt-2 text-gray-600 text-sm">${spec.description}</p>
+                                
+                                <div class="mt-4 bg-blue-50 p-3 rounded-md">
+                                    <h4 class="font-semibold text-sm text-blue-800">✨ Desglose de compatibilidad:</h4>
+                                    <p class="text-sm text-blue-700">${spec.matchReason}</p>
+                                </div>
+
+                                <button class="mt-6 w-full md:w-auto px-5 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                    Ver Perfil Completo
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    resultsEl.innerHTML += specialistCardHTML;
+                });
+            }
+
+
+            // Mostrar página de inicio por defecto
             showPage('page-home');
         });
     </script>
 
 </body>
 </html>
-
