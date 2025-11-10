@@ -1,45 +1,70 @@
 export default async function handler(req, res) {
+  // 1. Solo permitir solicitudes POST (buenas prácticas)
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method Not Allowed' });
-    return;
+    return res.status(405).json({ message: 'Método no permitido' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    res.status(500).json({ error: 'API key is not set on server' });
-    return;
+  // 2. Obtener el 'userPrompt' que envió el frontend
+  const { userPrompt } = req.body;
+
+  if (!userPrompt) {
+    return res.status(400).json({ message: 'userPrompt es requerido' });
   }
 
-  const { prompt } = req.body;
-  if (!prompt) {
-    res.status(400).json({ error: 'Prompt is required' });
-    return;
+  // 3. Obtener la API Key de forma SEGURA (Variables de Entorno)
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+  if (!GEMINI_API_KEY) {
+    return res.status(500).json({ message: 'API Key no configurada en el servidor' });
   }
 
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-  const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
+  const genAIApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
+
+  // 4. Definir el System Prompt y el Schema (igual que antes)
+  const systemPrompt = `Eres un generador de perfiles para PsyConnect... [Tu prompt de sistema completo aquí] ...`;
+  const jsonSchema = {
+    "type": "ARRAY",
+    "items": {
+      "type": "OBJECT",
+      "properties": {
+        "name": { "type": "STRING" },
+        "specialty": { "type": "STRING" },
+        "description": { "type": "STRING" },
+        "matchReason": { "type": "STRING" }
+      },
+      "required": ["name", "specialty", "description", "matchReason"]
+    }
   };
 
+  const payload = {
+    contents: [{ parts: [{ text: userPrompt }] }],
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: jsonSchema
+    }
+  };
+
+  // 5. Llamar a la API de Gemini (desde el servidor)
   try {
-    const apiResponse = await fetch(apiUrl, {
+    const apiResponse = await fetch(genAIApiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
 
     if (!apiResponse.ok) {
-      const errorData = await apiResponse.json();
-      console.error('Google API Error:', errorData);
-      res.status(apiResponse.status).json({ error: 'Failed to call Google API', details: errorData });
-      return;
+      // Si Gemini da error, pasarlo al frontend
+      const errorText = await apiResponse.text();
+      return res.status(apiResponse.status).json({ message: `Error de Gemini: ${errorText}` });
     }
 
     const data = await apiResponse.json();
+
+    // 6. Enviar la respuesta exitosa de vuelta al frontend
     res.status(200).json(data);
 
   } catch (error) {
-    console.error('Internal Server Error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    res.status(500).json({ message: `Error interno del servidor: ${error.message}` });
   }
 }
