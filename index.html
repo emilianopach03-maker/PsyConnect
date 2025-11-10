@@ -475,7 +475,7 @@
 
     <!-- ===== SCRIPT PRINCIPAL ===== -->
     <script>
-
+        // ¡YA NO HAY API KEY AQUÍ!
         
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -642,12 +642,12 @@
                 botTyping.style.display = 'block';
                 chatBody.scrollTop = chatBody.scrollHeight;
 
-                // 3. Obtener respuesta de Gemini
+                // 3. Obtener respuesta de Gemini (desde NUESTRO backend)
                 try {
                     const botResponse = await getGeminiChatResponse(messageText);
                     appendMessage(botResponse, 'bot');
                 } catch (error) {
-                    console.error("Error al contactar la API de Gemini:", error);
+                    console.error("Error al contactar la API de Chat:", error);
                     appendMessage("Lo siento, estoy teniendo problemas para conectarme. Por favor, intenta de nuevo más tarde.", 'bot');
                 } finally {
                     // 4. Ocultar "escribiendo"
@@ -669,56 +669,22 @@
             // --- LÓGICA DE API DE GEMINI ---
 
             /**
-             * Maneja reintentos con backoff exponencial.
-             */
-            async function retryWithExponentialBackoff(fetchFn, maxRetries = 3, delay = 1000) {
-                let lastError;
-                for (let i = 0; i < maxRetries; i++) {
-                    try {
-                        return await fetchFn();
-                    } catch (error) {
-                        lastError = error;
-                        // No registrar en consola si es un error de throttling (429)
-                        if (error.status !== 429) {
-                            console.error(`Intento ${i + 1}/${maxRetries} fallido:`, error.message);
-                        }
-                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-                    }
-                }
-                throw lastError;
-            }
-
-            /**
-             * Llama a Gemini para el Chatbot.
+             * Llama a Gemini para el Chatbot (AHORA LLAMA A /api/chat)
              */
             async function getGeminiChatResponse(userQuery) {
-                const systemPrompt = `Eres un asistente virtual para un sitio web llamado "PsyConnect".
-Tu única función es responder preguntas sobre el servicio que ofrece PsyConnect.
-Reglas estrictas:
-1.  **Qué es PsyConnect:** Es un servicio gratuito que conecta a usuarios con psicólogos. El usuario llena un cuestionario y la IA le muestra perfiles de especialistas compatibles. Es un "puente" o "conector", no una clínica.
-2.  **Qué NO eres:** NO eres un psicólogo, terapeuta, ni médico. NO puedes dar consejos de salud mental, diagnósticos, opiniones sobre sentimientos, ni apoyo emocional.
-3.  **Cómo manejar solicitudes de ayuda:** Si un usuario te pide ayuda psicológica, te dice que se siente mal, o te pregunta sobre terapia, DEBES RECHAZARLO AMABLEMENTE. Responde algo como: "Entiendo. Sin embargo, no soy un profesional de la salud mental y no puedo darte consejos. Mi única función es explicarte cómo PsyConnect puede ayudarte a *encontrar* un especialista. Si deseas comenzar, puedes llenar el cuestionario. Si estás en una crisis, por favor contacta a los servicios de emergencia de tu localidad."
-4.  **Costo:** El servicio de PsyConnect (el cuestionario y la conexión) es gratuito. Los honorarios de cada psicólogo son aparte y se acuerdan con ellos.
-5.  **Sé breve:** Responde en 2-3 frases cortas. Mantén un tono amable y profesional.`;
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userQuery: userQuery })
+                });
 
-                const payload = {
-                    contents: [{ parts: [{ text: userQuery }] }],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                };
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Error ${response.status}`);
+                }
 
-                const fetchFn = async () => {
-                    const response = await fetch(genAIApiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    return response.json();
-                };
-
-                const result = await retryWithExponentialBackoff(fetchFn);
+                const result = await response.json(); // Respuesta directa de Gemini
                 
                 if (result.candidates && result.candidates[0].content?.parts?.[0]?.text) {
                     return result.candidates[0].content.parts[0].text;
@@ -747,9 +713,8 @@ Reglas estrictas:
             }
 
             /**
-             * Llama a Gemini para generar perfiles de especialistas (con JSON).
+             * Llama a Gemini para generar perfiles (LLAMA A /api/generateProfiles)
              */
-       // Busca esta función en tu <script> dentro de index.html
             async function generateSpecialists() {
                 const loadingEl = document.getElementById('results-loading');
                 const resultsEl = document.getElementById('results-container');
@@ -758,10 +723,6 @@ Reglas estrictas:
                 resultsEl.innerHTML = '';
 
                 const userPrompt = getQuestionnaireData();
-                
-                // --- ¡CAMBIO IMPORTANTE AQUÍ! ---
-                // Ya no definimos el payload completo. Solo llamamos a nuestra API.
-                // La URL ahora es relativa a nuestro propio sitio.
                 
                 try {
                     // 1. Llama a NUESTRO backend, no al de Google
