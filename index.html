@@ -475,10 +475,8 @@
 
     <!-- ===== SCRIPT PRINCIPAL ===== -->
     <script>
-        // Clave de API (dejar vacía para que el entorno la proporcione)
-        const apiKey = "";
-        const genAIApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
+        
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- LÓGICA DE NAVEGACIÓN DE PÁGINAS ---
@@ -751,67 +749,46 @@ Reglas estrictas:
             /**
              * Llama a Gemini para generar perfiles de especialistas (con JSON).
              */
+       // Busca esta función en tu <script> dentro de index.html
             async function generateSpecialists() {
                 const loadingEl = document.getElementById('results-loading');
                 const resultsEl = document.getElementById('results-container');
 
                 loadingEl.style.display = 'block';
-                resultsEl.innerHTML = ''; // Limpiar resultados anteriores
+                resultsEl.innerHTML = '';
 
                 const userPrompt = getQuestionnaireData();
                 
-                // --- PROMPT DE SISTEMA ACTUALIZADO ---
-                const systemPrompt = `Eres un generador de perfiles para PsyConnect. Basado en las necesidades del usuario, crea un array de 2 o 3 perfiles de especialistas *ficticios*. Adhiérete estrictamente al esquema JSON proporcionado.
-El usuario ha proporcionado varias respuestas (razón, severidad, formato, estilo, etc.).
-Tu tarea más importante es que la 'matchReason' (razón del match) sea un desglose detallado que conecte *múltiples* de estas respuestas con el perfil del especialista. Sé específico.
-Ejemplo: 'Como buscas terapia online (formato) para una ansiedad que te afecta severamente (severidad) y prefieres un enfoque práctico (estilo), la Dra. Luna es ideal por su experiencia en TCC para trastornos de ansiedad en modalidad virtual.'`;
+                // --- ¡CAMBIO IMPORTANTE AQUÍ! ---
+                // Ya no definimos el payload completo. Solo llamamos a nuestra API.
+                // La URL ahora es relativa a nuestro propio sitio.
                 
-                const jsonSchema = {
-                    "type": "ARRAY",
-                    "items": {
-                        "type": "OBJECT",
-                        "properties": {
-                            "name": { "type": "STRING", "description": "Nombre ficticio (Ej. Dra. Isabel Luna)" },
-                            "specialty": { "type": "STRING", "description": "Especialidad principal (Ej. Terapia Cognitivo-Conductual)" },
-                            "description": { "type": "STRING", "description": "Breve descripción (Ej. 10 años de experiencia en ansiedad...)" },
-                            "matchReason": { "type": "STRING", "description": "Razón personalizada y detallada de por qué es un buen match, conectando múltiples respuestas del usuario." }
-                        },
-                        "required": ["name", "specialty", "description", "matchReason"]
-                    }
-                };
-
-                const payload = {
-                    contents: [{ parts: [{ text: userPrompt }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        responseSchema: jsonSchema
-                    }
-                };
-
                 try {
-                    const fetchFn = async () => {
-                        const response = await fetch(genAIApiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-                        return response.json();
-                    };
+                    // 1. Llama a NUESTRO backend, no al de Google
+                    const response = await fetch('/api/generateProfiles', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userPrompt: userPrompt }) // Enviamos el prompt al backend
+                    });
 
-                    const result = await retryWithExponentialBackoff(fetchFn);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || `Error ${response.status}`);
+                    }
 
+                    const result = await response.json(); // Esto es la respuesta directa de Gemini
+
+                    // 2. El resto de la lógica es la misma
                     if (result.candidates && result.candidates[0].content?.parts?.[0]?.text) {
                         const specialists = JSON.parse(result.candidates[0].content.parts[0].text);
                         renderSpecialists(specialists);
                     } else {
-                        throw new Error("No se recibieron perfiles.");
+                        throw new Error("No se recibieron perfiles válidos.");
                     }
 
                 } catch (error) {
                     console.error("Error al generar especialistas:", error);
-                    resultsEl.innerHTML = `<p class="text-red-500 text-center">Hubo un error al generar tus recomendaciones. Por favor, intenta de nuevo.</p>`;
+                    resultsEl.innerHTML = `<p class="text-red-500 text-center">Hubo un error al generar tus recomendaciones: ${error.message}</p>`;
                 } finally {
                     loadingEl.style.display = 'none';
                 }
